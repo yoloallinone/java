@@ -1,0 +1,47 @@
+index.html
+
+<html>
+    <form action="demo1.jsp">
+Enter a Department ID <input type="text" name="t1">
+
+        <input type="submit"/>
+    
+    </form>
+
+</html>
+
+
+Demo1.jsp
+<%@page import="java.sql.*" %>
+
+<html>
+    <body>
+        <%!String n;%>
+        <%
+            n=request.getParameter("t1");
+                        
+            
+            try
+            {
+            Class.forName("com.mysql.jdbc.Driver");
+            Connection con=DriverManager.getConnection("jdbc:mysql://localhost/db1","root","oneness");
+                      
+            Statement pst=con.createStatement();
+           ResultSet rs=pst.executeQuery("select * from emp5;");
+           while(rs.next())
+           {
+               if(rs.getString("did").equals(n))
+               {
+                   out.print(rs.getString("dname"));
+               }
+           }
+           con.close();
+            }
+            
+            catch(Exception e)
+            {
+                out.println(e);
+            }
+              %>
+    </body>
+</html>
