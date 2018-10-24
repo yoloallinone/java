@@ -1,0 +1,55 @@
+Index.html
+
+<html>
+    <form action="JSP_DELETE.jsp">
+ID       <input type="text" name="t1">
+
+        <input type="submit"/>
+    
+    </form>
+
+</html>
+
+JSP_DELETE.jsp
+
+<%@page import="java.sql.*" %>
+
+<html>
+    <body>
+        <%!int n,f;%>
+        <%
+            n=Integer.parseInt(request.getParameter("t1"));
+            f=0;
+            
+            try
+            {
+            Class.forName("com.mysql.jdbc.Driver");
+            Connection con=DriverManager.getConnection("jdbc:mysql://localhost/db1","root","oneness");
+                      PreparedStatement pst=con.prepareStatement("delete from emp where eid=?");
+
+           ResultSet rs=pst.executeQuery("select * from emp;");
+           while(rs.next())
+           {
+               f=1;
+           }
+           if(f==1)
+           {
+                          pst.setInt(1,n);
+                       pst.executeUpdate();   
+                       out.print("Id deleted from database");
+           }
+           else
+           {
+              out.print("no id ");
+           }
+           
+           con.close();
+            }
+            
+            catch(Exception e)
+            {
+                out.println(e);
+            }
+              %>
+    </body>
+</html>
