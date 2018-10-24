@@ -1,0 +1,82 @@
+Index.html
+<html>
+    <head>
+        <title>6b</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    </head>
+    <body>
+        <form action="Booking" >
+        Select a room Type<br>
+        <input type="radio" name="txtType" value="Delux">Delux
+        <input type="radio" name="txtType" value="Super Delux">Super Delux
+        <input type="radio" name="txtType" value="Suit">Suit<br>
+        Enter Your Name<input type="text" name="txtCust" ><br>
+        Enter Mobile No.<input type="text" name="txtMob" ><br>
+        <input type="reset" ><input type="submit" value="Book Room">
+        </form>
+    </body>
+</html>
+Booking.java
+package mypack;
+
+import java.io.IOException;
+import java.io.PrintWriter;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.ejb.EJB;
+import newpackage.BookBean;
+public class Booking extends HttpServlet {
+@EJB BookBean obj;
+    protected void processRequest(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        response.setContentType("text/html;charset=UTF-8");
+        PrintWriter out = response.getWriter();
+       String rt=request.getParameter("txtType");
+    String cn=request.getParameter("txtCust");
+    String cm=request.getParameter("txtMob");
+    String msg = obj.roomBook(rt, cn, cm);
+    out.println(msg);
+    }}
+BookingBean.java
+package newpackage;
+
+import javax.ejb.Stateless;
+import java.sql.*;
+
+@Stateless
+public class BookBean {
+
+    public BookBean()
+    {}
+    public String roomBook(String rt, String cn, String cm){
+String msg="";
+try{
+Class.forName("com.mysql.jdbc.Driver");
+Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/mysql","root","root");
+String query="select * from rookbook where RoomType=? and status='Not Booked'";
+PreparedStatement pst = con.prepareStatement(query);
+pst.setString(1,rt);
+ResultSet rs= pst.executeQuery();
+if(rs.next()){
+String rno=rs.getString(1);
+PreparedStatement stm1 = con.prepareStatement("update rookbook set cust=? where RoomId=? ");
+PreparedStatement stm2 = con.prepareStatement("update rookbook set mob=? where RoomId=? ");
+PreparedStatement stm3 = con.prepareStatement("update rookbook set status=? where RoomId=? ");
+stm1.setString(1,cn); stm1.setString(2,rno);
+stm2.setString(1,cm); stm2.setString(2,rno);
+stm3.setString(1, "Booked"); stm3.setString(2,rno);
+stm1.executeUpdate();
+stm2.executeUpdate();
+stm3.executeUpdate();
+msg = "Room "+rno+ " Booked <br> Charges = "+rs.getString(3);
+}
+else
+{
+msg = "Room "+rt+ " currently Not available";
+}
+}catch(Exception e){msg=""+e;}
+return msg;}
+}
