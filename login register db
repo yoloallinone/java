@@ -1,0 +1,144 @@
+Index.html
+<html>
+    <head>
+        <title>Main Page</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    </head>
+    <body>
+        <h1><a href="Register.html">Click To Register</a></h1><br>
+        <h1><a href="Login.html">Click To Login</a></h1>
+    </body>
+</html>
+Register.html
+<html>
+    <head>
+        <title>Registration</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    </head>
+    <body>
+       <form action="Register.jsp">
+           User Name:<input type="text" name="name"><br>
+           Password:<input type="text" name="pswd"><br>
+           Re-Enter Password:<input type="text" name="repswd"><br>
+           Mail:<input type="text" name="mail"><br>
+           Country:<input type="text" name="country"><br>
+           <input type="submit" value="submit">
+           <input type="reset" value="reset">
+       </form>
+    </body>
+</html>
+Register.jsp
+<%@page import="java.sql.*"%>
+<%@page contentType="text/html" pageEncoding="UTF-8"%>
+
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <title>Registration JSP</title>
+    </head>
+    <body>
+       <%
+           String name=request.getParameter("name");
+           String pass1=request.getParameter("pswd");
+           String pass2=request.getParameter("repswd");
+           String mail=request.getParameter("mail");
+           String country=request.getParameter("country");
+           if(pass1.equals(pass2))
+           {
+               try
+               {
+                   Class.forName("com.mysql.jdbc.Driver");
+                   Connection con=DriverManager.getConnection("jdbc:mysql://localhost:3306/mysql","root","root");
+                   PreparedStatement pstmt=con.prepareStatement("Insert into reg values(?,?,?,?)");
+                   pstmt.setString(1,name);
+                   pstmt.setString(2,pass1);
+                   pstmt.setString(3,mail);
+                   pstmt.setString(4,country);
+                   int row=pstmt.executeUpdate();
+                   if(row==1)
+                   {
+                       out.println("<h1>Congrats.!!!!Registered Successfullyy</h1>");
+                       con.close();
+                       pstmt.close();
+                   }
+                   else
+                   {
+                       out.println("<h1>Failed to Register</h1>");
+                       con.close();
+                       pstmt.close();
+                       %>
+                       <jsp:include page="Register.html"></jsp:include>
+                       <%
+                   }
+               }
+               catch(Exception e)
+               {
+                    out.println(e);
+               }
+           }
+            else
+            {
+                out.println("<h1>Password Mismatch</h1>");
+                %>
+                <jsp:include page="Register.html"></jsp:include>
+            <%}
+       %>
+    </body>
+</html>
+Login.html
+<html>
+    <head>
+        <title>Login</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    </head>
+    <body>
+        <form action="Loginjsp.jsp">
+            User Name:<input type="text" name="name"><br>
+            Pasword:<input type="password" name="pswd"><br>
+            <input type="submit" value="submit">
+            <input type="reset" value="reset">
+        </form>
+    </body>
+</html>
+Loginjsp.jsp
+<%@page contentType="text/html" pageEncoding="UTF-8"  import="java.sql.*"%>
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <title>JSP Page</title>
+    </head>
+    <body>
+      <%
+          String uname=request.getParameter("name");
+          String pass=request.getParameter("pswd");
+          try
+          {
+              Class.forName("com.mysql.jdbc.Driver");
+              Connection con=DriverManager.getConnection("jdbc:mysql://localhost:3306/mysql","root","root");
+              PreparedStatement pstmt=con.prepareStatement("select password from reg where username=? ");
+              pstmt.setString(1,uname);
+              ResultSet rs=pstmt.executeQuery();
+              if(rs.next())
+              {
+                  if(pass.equals(rs.getString(1)))
+                  {
+                      out.println("<h1>Login Successfull</h1>");
+                  }
+              }
+              else
+              {
+                  out.println("<h1>Doesnt Exist</h1>");
+              %>
+              <jsp:include page="Login.html"></jsp:include>
+              <%         
+                }
+            }
+          catch(Exception e)
+        {out.println(e);   }
+                %> 
+    </body>
+</html>
