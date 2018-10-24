@@ -1,0 +1,118 @@
+<%@page import="javax.jms.JMSException, javax.naming.InitialContext, javax.jms.TextMessage, javax.jms.MessageProducer, javax.jms.Session, javax.jms.Connection, javax.jms.Queue, javax.jms.ConnectionFactory" %>
+<%@page contentType="text/html" pageEncoding="UTF-8"%>
+<!DOCTYPE html>
+<%!
+    private static ConnectionFactory connectionFactory;
+    private static Queue queue;
+    Connection connection = null;
+    Session mysession = null;
+    MessageProducer messageProducer = null;
+    TextMessage message = null;
+%>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <title>Welcome To UPG Home Page</title>
+    </head>
+    <body style="background-color: pink;">
+        <h1>Welcome To UPG  Home page</h1>
+<%
+    try {
+        InitialContext ctx = new InitialContext();
+        queue = (Queue) ctx.lookup("jms/Queue");
+        connectionFactory = (ConnectionFactory) ctx.lookup("jms/QueueFactory");
+        connection = connectionFactory.createConnection();
+        mysession = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+        messageProducer = mysession.createProducer(queue);
+        message = mysession.createTextMessage();
+        message.setText(request.getRemoteAddr());
+        messageProducer.send(message);
+    } catch (JMSException e) {
+        System.out.println("Exception occurred: " + e.toString());
+    }
+%>
+    </body>
+</html>
+BassicMessageBean.java
+package ejb;
+import javax.annotation.Resource;
+import javax.ejb.ActivationConfigProperty;
+import javax.ejb.EJB;
+import javax.ejb.MessageDriven;
+import javax.ejb.MessageDrivenContext;
+import javax.jms.JMSException;
+import javax.jms.Message;
+import javax.jms.MessageListener;
+import javax.jms.TextMessage;
+@MessageDriven(activationConfig = {
+    @ActivationConfigProperty(propertyName = "destinationType", propertyValue = "javax.jms.Queue"),
+    @ActivationConfigProperty(propertyName = "destinationLookup", propertyValue = "jms/Queue")
+})
+public class BasicMessageBean implements MessageListener {
+    @EJB
+    VisitorStatBean vs;
+    @Resource
+    private MessageDrivenContext mdc;
+    public BasicMessageBean() {
+    }
+    @Override
+    public void onMessage(Message message) {
+        try {
+            if (message instanceof TextMessage) {
+                TextMessage msg = (TextMessage) message;
+                vs.addVisitor(msg.getText());
+            }
+        } catch (JMSException e) {
+            mdc.setRollbackOnly();
+        }
+    }
+}
+
+visitorStatBean.java
+package ejb;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+import javax.ejb.Stateless;
+@Stateless
+public class VisitorStatBean {
+    private Connection conn = null;
+    private ResultSet rs;
+    private Statement stmt = null;
+    private String query = null;
+    @PostConstruct
+    public void connect() {
+        try {
+            Class.forName("com.mysql.jdbc.Driver").newInstance();
+            conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/visitorstat","root","root");
+            System.out.println("Database connection established successfully.");
+        } catch(ClassNotFoundException | InstantiationException | IllegalAccessException | SQLException e) {
+            System.err.println("Sorry failed to connect to the Database.");
+        }
+    }
+    @PreDestroy
+    public void disconnect() {
+        try {
+            conn.close();
+            System.out.println("Database connection closed successfully.");
+        } catch(SQLException e) {
+            System.err.println("Cannot close the database connection: " + e.getMessage());
+        }
+    }
+    public void addVisitor(String host) {
+        try {
+            stmt = conn.createStatement();
+            query = "INSERT INTO UserStat (hostname, visits) VALUES('" + host + "','1')";
+            stmt.executeUpdate(query);
+        } catch(SQLException e) {
+            try {
+                stmt = conn.createStatement();
+                query = "UPDATE UserStat SET visits = visits + 1 WHERE hostname = '" + host + "'";
+                stmt.executeUpdate(query);
+            } catch(SQLException ex) {
+                System.err.println("Cannot update: " + ex.getMessage());
+            }}}}
