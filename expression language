@@ -1,0 +1,80 @@
+Pract 5B:
+Index.html
+<html>
+    <head>
+        <title>5b</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    </head>
+    <body>
+        <a href="Expression.jsp">Click for Expression</a>
+    </body>
+</html>
+Expression.jsp
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <title>JSP Page</title>
+    </head>
+   <body>
+    <h1>Basic Arithmetic</h1>
+    <blockquote>
+      <code>
+        <table border="1">
+          <thead>
+	    <td><b>EL Expression</b></td>
+	    <td><b>Result</b></td>
+	  </thead>
+	  <tr>
+	    <td>\${2}</td>
+	    <td>${2}</td>
+	  </tr>
+	  <tr>
+	    <td>\${2 + 2}</td>
+	    <td>${2 + 2}</td>
+	  </tr>
+	  <tr>
+	    <td>\${2.2 + 2.3}</td>
+	    <td>${2.2 + 2.3}</td>
+	  </tr>
+	  <tr>
+	    <td>\${2.2E4 + 2.4}</td>
+	    <td>${2.2E4 + 2.4}</td>
+	  </tr>
+	  <tr>
+	    <td>\${-2 - 2}</td>
+	    <td>${-2 - 2}</td>
+	  </tr>
+	  <tr>
+	    <td>\${2 * 2}</td>
+	    <td>${2 * 2}</td>
+	  </tr>
+	  <tr>
+	    <td>\${2/4}</td>
+	    <td>${2/4}</td>
+	  </tr>
+	  <tr>
+	    <td>\${2 div 4}</td>
+	    <td>${2 div 4}</td>
+	  </tr>
+	  <tr>
+	    <td>\${2/0}</td>
+	    <td>${2/0}</td>
+	  </tr>
+	  <tr>
+	    <td>\${12%4}</td>
+	    <td>${12%4}</td>
+	  </tr>
+	  <tr>
+	    <td>\${12 mod 4}</td>
+	    <td>${12 mod 4}</td>
+	  </tr>
+    <tr>
+      <td>\${(1==2) ? 3 : 4}</td>
+      <td>${(1==2) ? 3 : 4}</td>
+    </tr>
+	</table>
+      </code>
+    </blockquote>
+  </body>
+</html>
