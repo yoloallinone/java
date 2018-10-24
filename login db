@@ -1,0 +1,56 @@
+Index.html
+
+<html>
+    <form action="demo1.jsp">
+Name <input type="text" name="t1">
+pwd  <input type="password" name="t2">
+        <input type="submit"/>
+    
+    </form>
+
+</html>
+
+Demo1.jsp
+
+<%@page import="java.sql.*" %>
+
+<html>
+    <body>
+        <%!String n,p;
+        int f;%>
+        <%
+            n=request.getParameter("t1");
+                        p=request.getParameter("t2");
+           f=0;
+                        try{
+            Class.forName("com.mysql.jdbc.Driver");
+            Connection con=DriverManager.getConnection("jdbc:mysql://localhost/db1","root","oneness");
+                      //PreparedStatement pst=con.prepareStatement("delete from emp where eid=?");
+            Statement pst=con.createStatement();
+           ResultSet rs=pst.executeQuery("select * from emp4;");
+           while(rs.next())
+           {
+               if(rs.getString("name").equals(n) && rs.getString("password").equals(p))
+               {
+               f=1;
+               }
+           }
+           if(f==1)
+           {
+             
+                       out.print("Login Successfull");
+           }
+           else
+           {
+              out.print("Invalid user");
+           }
+           
+           con.close();
+            }
+           catch(Exception e)
+            {
+                out.println(e);
+            }
+              %>
+    </body>
+</html>
