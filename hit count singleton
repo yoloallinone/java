@@ -1,0 +1,47 @@
+7(A): Develop simple EJB application to demonstrate Servlet Hit count using Singleton Session Beans.
+ServletClient.java (Run this file)
+package mypack;
+
+import java.io.IOException;
+import java.io.PrintWriter;
+import javax.ejb.EJB;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+public class ServletClient extends HttpServlet {
+    @EJB 
+    CntServHitsBean counter;
+    protected void processRequest(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        response.setContentType("text/html;charset=UTF-8");
+        try (PrintWriter out = response.getWriter()) {
+        out.println("<h1> Number of times this servlet is accessed: </h1>"+ counter.getHitCnt());
+        }
+    }
+    @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        processRequest(request, response);
+    }
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        processRequest(request, response);
+    }
+    @Override
+    public String getServletInfo() {
+        return "Short description";
+    }// </editor-fold>
+}
+
+CntServHitsBean.java
+package mypack;
+import javax.ejb.Singleton;
+@Singleton
+public class CntServHitsBean {
+    private int hitcnt;
+    public int getHitCnt()
+    {
+        return hitcnt++;
+    }}
