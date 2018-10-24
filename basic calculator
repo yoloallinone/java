@@ -1,0 +1,52 @@
+<html>
+    <form action="demo1">
+        Enter a 1st Number<input type="text" name="t1">
+        Enter a 2nd Number<input type="text" name="t2">
+       
+        <select name="calculator">
+             
+            <option value="+">+</option>
+            <option value="-">-</option>
+             <option value="*">*</option>
+             <option value="/">/</option>
+             <option value="%">%</option>
+        </select>
+        <input type="submit">
+    </form>
+</html>
+
+
+import javax.servlet.*;
+import java.io.*;
+
+public class demo1 extends GenericServlet
+{
+    public void service(ServletRequest req,ServletResponse res)throws IOException,ServletException
+    {
+       String n =req.getParameter("calculator");
+       int n1=Integer.parseInt(req.getParameter("t1"));
+       int n2=Integer.parseInt(req.getParameter("t2"));
+       PrintWriter pw=res.getWriter();
+        if(n.equals ("+"))
+        {
+            pw.print("Addition is"+(n1+n2));            
+        }
+        else if(n.equals ("-"))
+        {
+            pw.print("Subtraction is"+(n1-n2));            
+        }
+        else if(n.equals ("*"))
+        {
+            pw.print("multiplication is"+(n1*n2));            
+        }
+        else if(n.equals ("/"))
+        {
+            pw.print("Division is"+(n1/n2));            
+        }
+        else 
+        {
+            pw.print("Remainder is"+(n1%n2));            
+        }
+        pw.close();
+    }
+}
