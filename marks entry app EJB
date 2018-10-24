@@ -1,0 +1,179 @@
+index.jsp
+<%@page import="java.util.Iterator, java.util.List, javax.naming.InitialContext, ejb.MarksApplication"%>
+<%@page contentType="text/html" pageEncoding="UTF-8"%>
+<!DOCTYPE html>
+<%!
+    private static MarksApplication marks;
+    public void jspInit() {
+        try {
+            InitialContext ic = new InitialContext();
+            marks = (MarksApplication) ic.lookup("java:global/Marks-war/MarksApplication");
+        } catch (Exception ex) {
+            System.out.println("Could not create marks bean." + ex.getMessage());
+        }
+    }
+%>
+<%
+    if(request.getParameter("txtCustomerName") != null) {
+        marks.initialize(request.getParameter("txtCustomerName"));
+    } else {
+        marks.initialize("Guest");
+    }    
+String marks1,marks2,marks3,marks4;
+    if (request.getParameter("btnAddMarks") != null) {
+      marks1 = request.getParameter("txt1");
+      marks2 = request.getParameter("txt2");
+      marks3 = request.getParameter("txt3");
+      marks4 = request.getParameter("txt4");    
+      marks.addMarks(marks1, marks2, marks3, marks4);     
+        }
+    //}
+%>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <title>Marks Application</title>
+    </head>
+    <body style="background-color: pink;">
+        <h1 style="text-align: center;">Marks Application</h1><br>
+        <form name="frmBooks" method="post">
+            <table style="background-color: pink; width: 100%; padding: 1px; border-spacing: 1px;">
+                <tr style="background-color: pink;">
+                    <td style="width: 70%">
+                        <table style="padding: 1px 1px 1px 1px; border-spacing: 1px; border: 2px solid maroon; width: 400px;">
+                            <tr>
+                                <td style="border: 2px solid maroon;">Name</td>
+                                <td style="border: 2px solid maroon;">
+                                    <input type="text" name="txtCustomerName" value=<%= request.getParameter("txtCustomerName")%> />
+                                </td>
+                            </tr>
+                            <tr style="background-color: maroon;">
+                                <th style="text-align: left; width: 340px; color: white; border: 2px solid maroon;" colspan="2">
+                                    <b>Subject Marks</b>
+                                </th>
+                            </tr>
+                            <tr>
+                                <td style="border: 2px solid maroon;">Subject 1
+                                    <input type="text" name="txt1" value="">
+                                </td>
+                                <td style="width: 340px; border: 2px solid maroon;"></td>
+                            </tr>
+                            <tr>
+                                <td style="border: 2px solid maroon;">Subject 2
+                                    <input type="text" name="txt2" value="">
+                                </td>
+                                <td style="width: 340px; border: 2px solid maroon;"></td>
+                            </tr>
+                            <tr>
+                                <td style="border: 2px solid maroon;">Subject 3
+                                    <input type="text" name="txt3" value="">
+                                </td>
+                                <td style="width: 340px; border: 2px solid maroon;"></td>
+                            </tr>
+                            <tr>
+                                <td style="border: 2px solid maroon;">Subject 4
+                                    <input type="text" name="txt4" value="">
+                                </td>
+                                <td style="width: 340px; height: 24px; border: 2px solid maroon;"></td>
+                            </tr>
+                            <tr>
+                                <td colspan="4" style="border: 2px solid maroon;">
+                                    <table style="background-color: pink; text-align: center;">
+                                        <tr>
+                                            <td style="text-align: center;">
+                                                <input type='submit' value='Show Subject' name='btnAddMarks'>
+                                            </td> 
+                                        </tr>
+                                    </table>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                    <td>
+                        <table style="border: 1px solid blue; width: 300px; height: 180px; text-align: right;">
+                            <tr>
+                                <td style="text-align: center; background-color: lightblue; border: 1px solid blue; height: 20px;">Result</td>
+                            </tr>
+                <%
+                    if(marks!=null){
+                        List<String> bookList = marks.getContents();
+                        Iterator iterator = bookList.iterator();
+                        while (iterator.hasNext()) {
+                            String title = (String) iterator.next();
+                %>
+                            <tr>
+                                <td style="text-align: left; background-color: lightblue; border: 1px solid blue;"><%= title %></td>
+                            </tr>
+                <%
+                        }
+                    }
+                %>
+                        </table>
+                    </td>
+                </tr>
+            </table>
+        </form>
+    </body>
+</html>
+
+MarksApplication.java
+package ejb;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
+import javax.ejb.Remove;
+import javax.ejb.Stateful;
+@Stateful
+public class MarksApplication {
+    List<String> contents;
+    String customerName;
+private Connection conn = null;
+    private ResultSet rs;
+    private Statement stmt = null;
+    private String query = null;
+public void initialize(String person) {
+        if (person != null) {
+            customerName = person;
+            try {
+                Class.forName("com.mysql.jdbc.Driver").newInstance();
+                conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/mysql","root","root");
+            } catch(ClassNotFoundException | IllegalAccessException | InstantiationException | SQLException e) {
+                System.err.println("Sorry failed to connect to the Database." + e.getMessage());
+            }
+        }
+        contents = new ArrayList<>();
+    }
+    public void addMarks(String m1, String m2, String m3,String m4) {
+        try {
+            stmt = conn.createStatement();
+            query = "INSERT INTO student VALUES('" + customerName + "','" + m1 + "','" + m2 + "','" + m3 + "','" + m4 + "')";
+            stmt.executeUpdate(query);
+        } catch(SQLException e) {
+            System.err.println("Sorry failed to insert values from the database table. " + e.getMessage());
+        }
+    }
+    public List<String> getContents() {
+        try {
+            stmt = conn.createStatement();
+            query = "SELECT * FROM student WHERE sname='" + customerName + "'";
+            rs = stmt.executeQuery(query);
+            while(rs.next()) {
+                contents.add(rs.getString("marks1"));
+                contents.add(rs.getString("marks2"));
+                contents.add(rs.getString("marks3"));
+                contents.add(rs.getString("marks4"));
+            }
+        } catch(SQLException e) {
+            System.err.println("Sorry failed to select values from the database table. " + e.getMessage());
+        }
+        return contents;
+    }
+    @Remove()
+    public void remove() {
+        contents = null;
+    }
+}
