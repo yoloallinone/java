@@ -1,0 +1,51 @@
+<html>
+    <form action="demo2" method="get">
+        Name <input type="text" name="t1">
+        pwd<input type="text" name="t2">
+        email <input type="text" name="t3">
+         country<input type="text" name="t4">
+        <input type="submit">
+    </form>
+    
+</html>
+
+
+demo2.java
+
+import java.io.*;
+import javax.servlet.http.*;
+import javax.servlet.*;
+import java.sql.*;
+
+public class demo2 extends HttpServlet 
+{
+    public void doGet(HttpServletRequest req, HttpServletResponse res)
+            throws ServletException, IOException 
+    {
+        PrintWriter pw=res.getWriter();
+            String n=req.getParameter("t1");
+            String p=req.getParameter("t2");
+            String e=req.getParameter("t3");
+            String c=req.getParameter("t4");
+        try
+        {  
+            Class.forName("com.mysql.jdbc.Driver");
+            Connection con=DriverManager.getConnection("jdbc:mysql://localhost/db1",
+"root","oneness");
+
+           PreparedStatement   st=con.prepareStatement("insert into info values(?,?,?,?)");
+           st.setString(1, n);
+            st.setString(2, p);
+            st.setString(3, e);
+            st.setString(4, c);
+            
+            st.executeUpdate();
+            
+            pw.println("conn");
+            con.close();
+        }
+        catch(Exception ee)
+    {
+            pw.println(ee);
+    }
+}
